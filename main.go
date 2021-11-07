@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	DbUser  = "postgres:123"
-	DbName = "demo"
+	DbUser          = "postgres:123"
+	DbName          = "demo"
 	DbHost          = "192.168.150.130"
 	GoroutinesCount = 10
-	BatchSize = 100
+	BatchSize       = 100
 )
 
 type Counter struct {
@@ -25,7 +25,7 @@ type Counter struct {
 }
 
 func getCounter(ctx context.Context) (ct *Counter, err error) {
-	conn, err := pgx.Connect(ctx, "postgresql://"+ DbUser +"@" + DbHost + "/" + DbName)
+	conn, err := pgx.Connect(ctx, "postgresql://"+DbUser+"@"+DbHost+"/"+DbName)
 	if err != nil {
 		return
 	}
@@ -58,9 +58,8 @@ func (ct *Counter) next() *int {
 	return nil
 }
 
-
-func readFromBase(ctx context.Context, id int, fileSync bool, ctr *Counter, endChan chan int)  {
-	conn, err := pgx.Connect(ctx, "postgresql://"+ DbUser +"@" + DbHost + "/" + DbName)
+func readFromBase(ctx context.Context, id int, fileSync bool, ctr *Counter, endChan chan int) {
+	conn, err := pgx.Connect(ctx, "postgresql://"+DbUser+"@"+DbHost+"/"+DbName)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -99,7 +98,7 @@ func readFromBase(ctx context.Context, id int, fileSync bool, ctr *Counter, endC
 			if err != nil {
 				log.Fatalln(err)
 			}
-			if _, err := f.Write([]byte(fmt.Sprintf("[%d]%d| %s %d %s\n", id, *offset + i, ticketNo,
+			if _, err := f.Write([]byte(fmt.Sprintf("[%d]%d| %s %d %s\n", id, *offset+i, ticketNo,
 				flightId, seatNo))); err != nil {
 				log.Fatalln(err)
 			}
@@ -115,7 +114,7 @@ func readFromBase(ctx context.Context, id int, fileSync bool, ctr *Counter, endC
 func runRead(ctr *Counter, fileSync bool) {
 	endChan := make(chan int)
 	for i := 0; i < GoroutinesCount; i++ {
-		go readFromBase(context.Background(), i + 1, fileSync, ctr, endChan)
+		go readFromBase(context.Background(), i+1, fileSync, ctr, endChan)
 	}
 
 	for i := 0; i < GoroutinesCount; i++ {
